@@ -3,73 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Proxy Example</title>
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <title>Simple Proxy Example</title>
 </head>
 <body>
 
-  <h1>Proxy Example</h1>
+  <h1>Simple Proxy Example</h1>
+
+  <label for="websiteInput">Enter Website URL:</label>
+  <input type="text" id="websiteInput" placeholder="E.g., https://www.example.com">
+  <button onclick="redirectToProxy()">Go</button>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const express = require('express');
-      const axios = require('axios');
+    function redirectToProxy() {
+      const websiteInput = document.getElementById('websiteInput').value;
+      const serviceId = generateRandomId();
+      window.location.href = `https://prestont500.github.io/proxtest/service/${serviceId}?url=${encodeURIComponent(websiteInput)}`;
+    }
 
-      const app = express();
-      const PORT = 3000;
-
-      app.use(express.json());
-
-      app.post('/service/:randomId', async (req, res) => {
-        try {
-          const { randomId } = req.params;
-          const { url, method, headers, body } = req.body;
-
-          console.log(`Proxy request for ID: ${randomId}, URL: ${url}`);
-
-          const response = await axios({
-            method: method || 'GET',
-            url,
-            headers,
-            data: body,
-          });
-
-          res.json(response.data);
-        } catch (error) {
-          console.error('Proxy Error:', error.message);
-          res.status(500).json({ error: 'Internal Server Error' });
-        }
-      });
-
-      app.listen(PORT, () => {
-        console.log(`Proxy Server is running on http://localhost:${PORT}`);
-      });
-
-      const proxyUrl = 'http://localhost:3000/service/';
-
-      async function makeProxyRequest() {
-        try {
-          const randomId = generateRandomId();
-          const targetUrl = 'https://www.example.com'; // Replace with your target URL
-
-          const response = await axios.post(`${proxyUrl}${randomId}`, {
-            url: targetUrl,
-            method: 'GET',
-          });
-
-          console.log('Proxy Response:', response.data);
-        } catch (error) {
-          console.error('Proxy Request Error:', error.message);
-        }
-      }
-
-      function generateRandomId() {
-        const randomId = Math.random().toString(36).substring(7);
-        return randomId;
-      }
-
-      makeProxyRequest();
-    });
+    function generateRandomId() {
+      return Math.random().toString(36).substring(7);
+    }
   </script>
 
 </body>
