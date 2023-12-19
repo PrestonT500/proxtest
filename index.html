@@ -3,26 +3,78 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simple Proxy Example</title>
+  <title>Proxy Example</title>
 </head>
 <body>
 
-  <h1>Simple Proxy Example</h1>
-
-  <label for="websiteInput">Enter Website URL:</label>
-  <input type="text" id="websiteInput" placeholder="E.g., https://www.example.com">
-  <button onclick="redirectToProxy()">Go</button>
+  <h1>Proxy Example</h1>
 
   <script>
-    function redirectToProxy() {
-      const websiteInput = document.getElementById('websiteInput').value;
-      const serviceId = generateRandomId();
-      window.location.href = `https://prestont500.github.io/proxtest/service/${serviceId}?url=${encodeURIComponent(websiteInput)}`;
+    function registerServiceWorker() {
+      return window.navigator.serviceWorker.register("./sw.js", {
+        scope: __uv$config.prefix,
+      });
     }
 
-    function generateRandomId() {
-      return Math.random().toString(36).substring(7);
+    function encodeAndNavigateTo(url) {
+      const encodedUrl = __uv$config.encodeUrl(url);
+      sessionStorage.setItem("encodedUrl", encodedUrl);
+      window.location.href = "/proxtest/" + encodedUrl;
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.querySelector("form");
+      const input = document.querySelector("input");
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        try {
+          const registration = await registerServiceWorker();
+          let url = input.value.trim();
+          if (!isUrl(url)) url = "https://www.google.com/search?q=" + url;
+          else if (!(url.startsWith("https://") || url.startsWith("http://")))
+            url = "http://" + url;
+          await encodeAndNavigateTo(url);
+        } catch (error) {
+          console.error('Service worker registration error:', error);
+        }
+      });
+
+      function images(value) {
+        try {
+          const registration = await registerServiceWorker();
+          let url = value.trim();
+          if (!isUrl(url)) url = "https://www.google.com/search?q=" + url;
+          else if (!(url.startsWith("https://") || url.startsWith("http://")))
+            url = "https://" + url;
+          await encodeAndNavigateTo(url);
+        } catch (error) {
+          console.error('Service worker registration error:', error);
+        }
+      }
+
+      function blank(value) {
+        try {
+          const registration = await registerServiceWorker();
+          let url = value.trim();
+          if (!isUrl(url)) url = "https://www.google.com/search?q=" + url;
+          else if (!(url.startsWith("https://") || url.startsWith("http://")))
+            url = "https://" + url;
+          window.location.href = __uv$config.prefix + await encodeAndNavigateTo(url);
+        } catch (error) {
+          console.error('Service worker registration error:', error);
+        }
+      }
+
+      function isUrl(val = "") {
+        if (
+          /^http(s?):\/\//.test(val) ||
+          (val.includes(".") && val.substr(0, 1) !== " ")
+        )
+          return true;
+        return false;
+      }
+    });
   </script>
 
 </body>
